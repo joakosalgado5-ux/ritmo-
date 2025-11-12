@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Ritmo+ — Seguimiento de Hábitos</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;background:#0f172a;color:#e5e7eb}
+    header{padding:16px 20px;background:#111827;border-bottom:1px solid #1f2937}
+    pre{white-space:pre-wrap;word-wrap:break-word;padding:16px 20px;margin:0}
+    button{margin:12px 20px;padding:10px 14px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;cursor:pointer}
+    button:hover{border-color:#22d3ee}
+  </style>
+</head>
+<body onload="ritmoplus()">
+  <header><strong>Ritmo+</strong> — Consola web</header>
+  <pre id="out"></pre>
+  <button onclick="ritmoplus()">Iniciar/Reiniciar</button>
+
+  <script>
+    function ritmoplus(){
+      const out = document.getElementById('out');
+      out.textContent = ""; // limpiar pantalla
+
+      const w = (...args) => { out.textContent += args.join('') + "\n"; };
+
+      // Variables
+      let nombre_usuario = "";
+      let meta_estudio = 0, meta_agua = 0, meta_sueno = 0, meta_actividad = 0;
+      let actual_estudio = 0, actual_agua = 0, actual_sueno = 0, actual_actividad = 0;
+      let streak_estudio = 0, streak_agua = 0, streak_sueno = 0, streak_actividad = 0;
+      let opcion = 0;
+      let i = 0, dias_consecutivos = 0; // (no usados, se mantienen por fidelidad)
+      let fecha = "";
+
+      const pct = (a,m) => (m>0 && isFinite(m)) ? (a/m)*100 : 0;
+
+      // Inicio
+      w("=== RITMO+ - BIENVENIDO ===");
+      w("Sistema de Seguimiento de Hábitos Saludables");
+      w("");
+
+      // Config inicial
+      nombre_usuario = prompt("Ingresa tu nombre:") || "Usuario";
+      w("Hola " + nombre_usuario + ", configura tus metas diarias:");
+
+      meta_estudio = Number(prompt("Meta de estudio (horas, 0 a 24):"));
+      while (isNaN(meta_estudio) || meta_estudio < 0 || meta_estudio > 24) {
+        meta_estudio = Number(prompt("Valor invalido. Ingresa horas de estudio (0–24):"));
+      }
+
+      meta_agua = Number(prompt("Meta de agua (vasos de 250 ml, 0–20):"));
+      while (isNaN(meta_agua) || meta_agua < 0 || meta_agua > 20) {
+        meta_agua = Number(prompt("Valor inválido. Ingresa vasos de agua (0–20):"));
+      }
+
+      meta_sueno = Number(prompt("Meta de sueño (horas, 0–24):"));
+      while (isNaN(meta_sueno) || meta_sueno < 0 || meta_sueno > 24) {
+        meta_sueno = Number(prompt("Valor inválido. Ingresa horas de sueño (0–24):"));
+      }
+
+      meta_actividad = Number(prompt("Meta de actividad física (minutos, 0–300):"));
+      while (isNaN(meta_actividad) || meta_actividad < 0 || meta_actividad > 300) {
+        meta_actividad = Number(prompt("Valor inválido. Ingresa minutos de actividad (0–300):"));
+      }
+
+      // Inicializar seguimiento
+      actual_estudio = 0; actual_agua = 0; actual_sueno = 0; actual_actividad = 0;
+      streak_estudio = 0; streak_agua = 0; streak_sueno = 0; streak_actividad = 0;
+
+      // Menú
+      do {
+        const menu =
+          "=== MENÚ PRINCIPAL ===\n" +
+          "1. Registrar avance en hábitos\n" +
+          "2. Ver progreso actual\n" +
+          "3. Ver streaks\n" +
+          "4. Reporte semanal\n" +
+          "5. Salir\n" +
+          "Selecciona una opción (1–5):";
+
+        opcion = Number(prompt(menu));
+        if (isNaN(opcion)) { w("Opción inválida."); continue; }
+
+        switch (opcion) {
+          case 1: {
+            const sub =
+              "¿Qué hábito deseas registrar?\n" +
+              "1. Estudio\n" +
+              "2. Agua\n" +
+              "3. Sueño\n" +
+              "4. Actividad física\n" +
+              "Selecciona 1–4:";
+            const subop = Number(prompt(sub));
+            switch (subop) {
+              case 1: {
+                const v = Number(prompt("Ingresa las horas de estudio realizadas:"));
+                if (isNaN(v)) { w("Entrada cancelada."); break; }
+                actual_estudio = v;
+                if (actual_estudio >= meta_estudio) {
+                  streak_estudio++;
+                  w("¡Meta de estudio cumplida! Streak: " + streak_estudio);
+                } else {
+                  streak_estudio = 0;
+                  w("Aún no alcanzas la meta de estudio. ¡Sigue intentando!");
+                }
+              } break;
+
+              case 2: {
+                const v = Number(prompt("Ingresa la cantidad de vasos de agua tomados:"));
+                if (isNaN(v)) { w("Entrada cancelada."); break; }
+                actual_agua = v;
+                if (actual_agua >= meta_agua) {
+                  streak_agua++;
+                  w("¡Meta de agua cumplida! Streak: " + streak_agua);
+                } else {
+                  streak_agua = 0;
+                  w("Aún no alcanzas la meta de agua. ¡Sigue intentando!");
+                }
+              } break;
+
+              case 3: {
+                const v = Number(prompt("Ingresa las horas de sueño:"));
+                if (isNaN(v)) { w("Entrada cancelada."); break; }
+                actual_sueno = v;
+                if (actual_sueno >= meta_sueno) {
+                  streak_sueno++;
+                  w("¡Meta de sueño cumplida! Streak: " + streak_sueno);
+                } else {
+                  streak_sueno = 0;
+                  w("Aún no alcanzas la meta de sueño. ¡Sigue intentando!");
+                }
+              } break;
+
+              case 4: {
+                const v = Number(prompt("Ingresa los minutos de actividad física:"));
+                if (isNaN(v)) { w("Entrada cancelada."); break; }
+                actual_actividad = v;
+                if (actual_actividad >= meta_actividad) {
+                  streak_actividad++;
+                  w("¡Meta de actividad física cumplida! Streak: " + streak_actividad);
+                } else {
+                  streak_actividad = 0;
+                  w("Aún no alcanzas la meta de actividad. ¡Sigue intentando!");
+                }
+              } break;
+
+              default: w("Opción inválida.");
+            }
+          } break;
+
+          case 2:
+            w("=== PROGRESO ACTUAL ===");
+            w("Estudio: " + actual_estudio + "/" + meta_estudio + " horas");
+            w("Agua: " + actual_agua + "/" + meta_agua + " vasos");
+            w("Sueño: " + actual_sueno + "/" + meta_sueno + " horas");
+            w("Actividad física: " + actual_actividad + "/" + meta_actividad + " minutos");
+            break;
+
+          case 3:
+            w("=== STREAKS ACTUALES ===");
+            w("Estudio: " + streak_estudio + " días");
+            w("Agua: " + streak_agua + " días");
+            w("Sueño: " + streak_sueno + " días");
+            w("Actividad física: " + streak_actividad + " días");
+            break;
+
+          case 4:
+            w("=== REPORTE SEMANAL ===");
+            w("Progreso promedio esta semana:");
+            w("Estudio: " + pct(actual_estudio, meta_estudio).toFixed(1) + "%");
+            w("Agua: " + pct(actual_agua, meta_agua).toFixed(1) + "%");
+            w("Sueño: " + pct(actual_sueno, meta_sueno).toFixed(1) + "%");
+            w("Actividad física: " + pct(actual_actividad, meta_actividad).toFixed(1) + "%");
+            break;
+
+          case 5:
+            w("¡Hasta pronto, " + nombre_usuario + "! Sigue con tus hábitos.");
+            break;
+
+          default:
+            w("Opción inválida. Por favor, elige una opción del 1 al 5.");
+        }
+      } while (opcion !== 5);
+    }
+  </script>
+</body>
+</html>
+
